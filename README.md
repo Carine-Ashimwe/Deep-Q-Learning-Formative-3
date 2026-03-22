@@ -60,7 +60,7 @@ python select_best_model.py
 
 ## Gameplay Video
 
-> 📹 Video of the best model (Carine — `10_Optimized`, mean reward: **24.4**) playing Breakout will be added here before final submission.
+> 📹 Link to gameplay video of the best model (Carine — `10_Optimized`, mean reward: **24.4**) playing Breakout here:
 >
 > ---
 >
