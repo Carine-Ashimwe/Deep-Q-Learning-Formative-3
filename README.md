@@ -1,14 +1,12 @@
 # Deep Q-Learning Formative 3 — ALE/Breakout-v5
 
-**Course:** Machine Learning Techniques II
-
 **Environment:** ALE/Breakout-v5 (Atari Breakout)
 
 **Framework:** Stable Baselines3 + Gymnasium
 
 ---
 
-## Group Members
+## Team Members
 
 | Name | GitHub |
 |---|---|
