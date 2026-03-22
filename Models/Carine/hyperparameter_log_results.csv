@@ -1,0 +1,11 @@
+Model Name,Policy,Learning Rate (lr),Gamma (γ),Batch Size,epsilon_start,epsilon_end,epsilon_decay,steps,env_id,Noted Behavior
+01_Baseline,CnnPolicy,0.0001,0.99,32,1.0,0.05,0.1,200000,ALE/Breakout-v5,Baseline setup for comparison.
+02_High_LR,CnnPolicy,0.001,0.99,32,1.0,0.05,0.1,200000,ALE/Breakout-v5,Higher LR; typically learns faster but may be unstable.
+03_Low_LR,CnnPolicy,0.00005,0.99,32,1.0,0.05,0.1,200000,ALE/Breakout-v5,Lower LR; more stable but slower convergence.
+04_Low_Gamma,CnnPolicy,0.0001,0.8,32,1.0,0.05,0.1,200000,ALE/Breakout-v5,Lower discount; prioritizes short-term rewards.
+05_High_Batch,CnnPolicy,0.0001,0.99,128,1.0,0.05,0.1,200000,ALE/Breakout-v5,Higher batch; smoother gradients and potentially more stable updates.
+06_Low_Batch,CnnPolicy,0.0001,0.99,8,1.0,0.05,0.1,200000,ALE/Breakout-v5,Low batch; noisier updates and exploratory behavior.
+07_Fast_Decay,CnnPolicy,0.0001,0.99,32,1.0,0.05,0.02,200000,ALE/Breakout-v5,Faster epsilon decay; exploration ends earlier.
+08_High_Min_Eps,CnnPolicy,0.0001,0.99,32,1.0,0.5,0.1,200000,ALE/Breakout-v5,Higher min epsilon; sustained exploration.
+09_MLP_Comparison,MlpPolicy,0.0001,0.99,32,1.0,0.05,0.1,200000,ALE/Breakout-v5,MLP policy comparison against CNN for image-based task.
+10_Optimized,CnnPolicy,0.0002,0.99,64,1.0,0.02,0.15,200000,ALE/Breakout-v5,Combined tuned values intended as optimized configuration.
