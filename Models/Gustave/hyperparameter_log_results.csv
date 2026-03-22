@@ -1,0 +1,11 @@
+Experiment,Policy,lr,gamma,batch_size,epsilon_end,epsilon_decay,Avg_Score
+G01_Baseline,CnnPolicy,0.0001,0.99,32,0.05,0.1,0.0
+G02_Higher_LR,CnnPolicy,0.0005,0.99,32,0.05,0.1,0.0
+G03_Very_Low_LR,CnnPolicy,1e-05,0.99,32,0.05,0.1,0.0
+G04_High_Gamma,CnnPolicy,0.0001,0.95,32,0.05,0.1,0.0
+G05_Low_Gamma,CnnPolicy,0.0001,0.85,32,0.05,0.1,0.67
+G06_Large_Batch,CnnPolicy,0.0001,0.99,64,0.05,0.1,2.0
+G07_Slow_Explore,CnnPolicy,0.0001,0.99,32,0.05,0.3,0.0
+G08_Low_Eps_End,CnnPolicy,0.0001,0.99,32,0.01,0.1,1.0
+G09_MLP_Policy,MlpPolicy,0.0001,0.99,32,0.05,0.1,0.0
+G10_Best_Combo,CnnPolicy,0.0003,0.97,48,0.02,0.2,0.0
