@@ -61,7 +61,7 @@ python select_best_model.py
 ## Gameplay Video
 
 > 📹 Link to gameplay video of the best model (Carine — `10_Optimized`, mean reward: **24.4**) playing Breakout here:
->
+> [▶ Watch gameplay video](https://drive.google.com/file/d/1BUSzQICR1fZTKVWc7_hdQoQAYBVLggv9/view?usp=drive_link)
 > ---
 >
 > ## Hyperparameter Tuning Results
