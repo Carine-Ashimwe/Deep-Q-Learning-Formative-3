@@ -1,0 +1,141 @@
+[
+  {
+    "id": 0,
+    "name": "01_Baseline_CNN",
+    "policy": "CnnPolicy",
+    "lr": 1e-4,
+    "gamma": 0.99,
+    "batch_size": 32,
+    "epsilon_start": 1.0,
+    "epsilon_end": 0.05,
+    "epsilon_decay": 0.1,
+    "steps": 200000,
+    "env_id": "ALE/Breakout-v5"
+  },
+
+  {
+    "id": 1,
+    "name": "02_Policy_MLP",
+    "policy": "MlpPolicy",
+    "lr": 1e-4,
+    "gamma": 0.99,
+    "batch_size": 32,
+    "epsilon_start": 1.0,
+    "epsilon_end": 0.05,
+    "epsilon_decay": 0.1,
+    "steps": 200000,
+    "env_id": "ALE/Breakout-v5"
+  },
+
+  {
+    "id": 2,
+    "name": "03_High_LR",
+    "policy": "CnnPolicy",
+    "lr": 1e-3,
+    "gamma": 0.99,
+    "batch_size": 32,
+    "epsilon_start": 1.0,
+    "epsilon_end": 0.05,
+    "epsilon_decay": 0.1,
+    "steps": 200000,
+    "env_id": "ALE/Breakout-v5"
+  },
+
+  {
+    "id": 3,
+    "name": "04_Low_LR",
+    "policy": "CnnPolicy",
+    "lr": 5e-5,
+    "gamma": 0.99,
+    "batch_size": 32,
+    "epsilon_start": 1.0,
+    "epsilon_end": 0.05,
+    "epsilon_decay": 0.1,
+    "steps": 200000,
+    "env_id": "ALE/Breakout-v5"
+  },
+
+  {
+    "id": 4,
+    "name": "05_Low_Gamma",
+    "policy": "CnnPolicy",
+    "lr": 1e-4,
+    "gamma": 0.8,
+    "batch_size": 32,
+    "epsilon_start": 1.0,
+    "epsilon_end": 0.05,
+    "epsilon_decay": 0.1,
+    "steps": 200000,
+    "env_id": "ALE/Breakout-v5"
+  },
+
+  {
+    "id": 5,
+    "name": "06_High_Batch",
+    "policy": "CnnPolicy",
+    "lr": 1e-4,
+    "gamma": 0.99,
+    "batch_size": 128,
+    "epsilon_start": 1.0,
+    "epsilon_end": 0.05,
+    "epsilon_decay": 0.1,
+    "steps": 200000,
+    "env_id": "ALE/Breakout-v5"
+  },
+
+  {
+    "id": 6,
+    "name": "07_Low_Batch",
+    "policy": "CnnPolicy",
+    "lr": 1e-4,
+    "gamma": 0.99,
+    "batch_size": 16,
+    "epsilon_start": 1.0,
+    "epsilon_end": 0.05,
+    "epsilon_decay": 0.1,
+    "steps": 200000,
+    "env_id": "ALE/Breakout-v5"
+  },
+
+  {
+    "id": 7,
+    "name": "08_Fast_Exploration_Decay",
+    "policy": "CnnPolicy",
+    "lr": 1e-4,
+    "gamma": 0.99,
+    "batch_size": 32,
+    "epsilon_start": 1.0,
+    "epsilon_end": 0.05,
+    "epsilon_decay": 0.02,
+    "steps": 200000,
+    "env_id": "ALE/Breakout-v5"
+  },
+
+  {
+    "id": 8,
+    "name": "09_High_Min_Epsilon",
+    "policy": "CnnPolicy",
+    "lr": 1e-4,
+    "gamma": 0.99,
+    "batch_size": 32,
+    "epsilon_start": 1.0,
+    "epsilon_end": 0.4,
+    "epsilon_decay": 0.1,
+    "steps": 200000,
+    "env_id": "ALE/Breakout-v5"
+  },
+
+  {
+    "id": 9,
+    "name": "10_Optimized_Attempt",
+    "policy": "CnnPolicy",
+    "lr": 2e-4,
+    "gamma": 0.95,
+    "batch_size": 64,
+    "epsilon_start": 1.0,
+    "epsilon_end": 0.02,
+    "epsilon_decay": 0.15,
+    "steps": 200000,
+    "env_id": "ALE/Breakout-v5"
+  }
+]
