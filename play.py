@@ -4,7 +4,8 @@ Play script for a trained Stable-Baselines3 DQN Atari agent.
 
 Usage examples:
     python play.py
-    python play.py --model-path dqn_model.zip --env-id ALE/Breakout-v5 --episodes 3
+    python play.py --model-path "Models/Carine/10_Optimized.zip" --env-id ALE/Breakout-v5 --episodes 3
+    python play.py --model-path auto --env-id ALE/Breakout-v5 --episodes 3
 
 Notes:
 - In SB3, greedy action selection is achieved with `deterministic=True` in `model.predict(...)`.
@@ -14,12 +15,14 @@ Notes:
 from __future__ import annotations
 
 import argparse
-import os
+import csv
+import sys
 import time
+from pathlib import Path
 from typing import Any, Callable, Optional, Tuple
 
 
-def _import_dependencies() -> tuple[Any, Any, Any, Any, Any, Any, Any]:
+def _import_dependencies() -> tuple[Any, Any, Any, Any, Any]:
     try:
         import numpy as np
         import gymnasium as gym
@@ -30,10 +33,9 @@ def _import_dependencies() -> tuple[Any, Any, Any, Any, Any, Any, Any]:
             # Older/newer Gymnasium setups may auto-register or use a different API.
             pass
         from stable_baselines3 import DQN
-        from stable_baselines3.common.atari_wrappers import AtariWrapper
         from stable_baselines3.common.env_util import make_atari_env
-        from stable_baselines3.common.vec_env import VecEnv, VecFrameStack, VecTransposeImage
-        return np, gym, DQN, AtariWrapper, make_atari_env, VecEnv, VecFrameStack, VecTransposeImage
+        from stable_baselines3.common.vec_env import VecEnv, VecFrameStack
+        return np, gym, DQN, make_atari_env, VecEnv, VecFrameStack
     except Exception as exc:
         raise RuntimeError(
             "Missing dependencies. Install them first, for example:\n"
@@ -42,39 +44,22 @@ def _import_dependencies() -> tuple[Any, Any, Any, Any, Any, Any, Any]:
         ) from exc
 
 
-def _build_vec_atari_env(
+def _build_train_like_vec_atari_env(
     env_id: str,
     seed: Optional[int],
     n_stack: int,
     render_mode: str,
     make_atari_env: Any,
     VecFrameStack: Any,
-    VecTransposeImage: Any,
 ) -> Any:
+    """Build environment using the same pipeline as train.py."""
     env = make_atari_env(
         env_id,
         n_envs=1,
         seed=seed,
         env_kwargs={"render_mode": render_mode},
-        wrapper_kwargs={"terminal_on_life_loss": False},
     )
     env = VecFrameStack(env, n_stack=n_stack)
-    env = VecTransposeImage(env)
-    return env
-
-
-def _build_atari_wrapper_env(env_id: str, seed: Optional[int], render_mode: str, gym: Any, AtariWrapper: Any) -> Any:
-    env = gym.make(env_id, render_mode=render_mode)
-    env = AtariWrapper(env, terminal_on_life_loss=False)
-    if seed is not None:
-        env.reset(seed=seed)
-    return env
-
-
-def _build_plain_env(env_id: str, seed: Optional[int], render_mode: str, gym: Any) -> Any:
-    env = gym.make(env_id, render_mode=render_mode)
-    if seed is not None:
-        env.reset(seed=seed)
     return env
 
 
@@ -84,38 +69,20 @@ def _select_compatible_env(
     seed: Optional[int],
     n_stack: int,
     render_mode: str,
-    gym: Any,
-    AtariWrapper: Any,
     make_atari_env: Any,
     VecFrameStack: Any,
-    VecTransposeImage: Any,
 ) -> Tuple[object, str]:
     builders: list[Tuple[str, Callable[[], object]]] = [
         (
-            "Vec Atari + FrameStack + Transpose",
-            lambda: _build_vec_atari_env(
+            "Vec Atari + FrameStack (train.py-compatible)",
+            lambda: _build_train_like_vec_atari_env(
                 env_id=env_id,
                 seed=seed,
                 n_stack=n_stack,
                 render_mode=render_mode,
                 make_atari_env=make_atari_env,
                 VecFrameStack=VecFrameStack,
-                VecTransposeImage=VecTransposeImage,
             ),
-        ),
-        (
-            "AtariWrapper (single env)",
-            lambda: _build_atari_wrapper_env(
-                env_id=env_id,
-                seed=seed,
-                render_mode=render_mode,
-                gym=gym,
-                AtariWrapper=AtariWrapper,
-            ),
-        ),
-        (
-            "Plain Gymnasium env",
-            lambda: _build_plain_env(env_id=env_id, seed=seed, render_mode=render_mode, gym=gym),
         ),
     ]
 
@@ -231,13 +198,162 @@ def _save_video(frames: list[Any], path: str, fps: int) -> None:
     print(f"Saved gameplay video: {path}")
 
 
+def _safe_float(value: Optional[str]) -> Optional[float]:
+    if value is None:
+        return None
+    try:
+        return float(str(value).strip())
+    except Exception:
+        return None
+
+
+def _find_best_from_csv(csv_path: Path, model_col: str, reward_col: str) -> Optional[tuple[str, float]]:
+    if not csv_path.exists():
+        return None
+
+    best_name: Optional[str] = None
+    best_reward = float("-inf")
+
+    with open(csv_path, "r", encoding="utf-8-sig", newline="") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            cleaned = {str(k).strip(): ("" if v is None else str(v).strip()) for k, v in row.items() if k is not None}
+            model_name = cleaned.get(model_col, "")
+            reward = _safe_float(cleaned.get(reward_col))
+            if not model_name or reward is None:
+                continue
+            if reward > best_reward:
+                best_name = model_name
+                best_reward = reward
+
+    if best_name is None:
+        return None
+    return best_name, best_reward
+
+
+def _find_zip_for_model(member_dir: Path, model_name: str) -> Optional[Path]:
+    exact = member_dir / f"{model_name}.zip"
+    if exact.exists():
+        return exact
+
+    model_key = model_name.strip().lower()
+    for p in member_dir.glob("*.zip"):
+        stem = p.stem.strip().lower()
+        if stem == model_key or stem.startswith(model_key):
+            return p
+    return None
+
+
+def _resolve_best_model_from_models_dir(models_dir: Path) -> Optional[Path]:
+    member_config = [
+        {
+            "folder": "Ayomide",
+            "csv": "hyperparameter_log_results with observations.csv",
+            "model_col": "Model Name",
+            "reward_col": "Observed Mean Reward",
+        },
+        {
+            "folder": "Armstrong",
+            "csv": "hyperparameter_log_results with observations.csv",
+            "model_col": "Model Name",
+            "reward_col": "Mean Reward",
+        },
+        {
+            "folder": "Carine",
+            "csv": "hyperparameter_log_results with observations.csv",
+            "model_col": "Model Name",
+            "reward_col": "Observed Mean Reward",
+        },
+        {
+            "folder": "Gustave",
+            "csv": "hyperparameter_log_results.csv",
+            "model_col": "Experiment",
+            "reward_col": "Avg_Score",
+        },
+    ]
+
+    best_path: Optional[Path] = None
+    best_reward = float("-inf")
+
+    for cfg in member_config:
+        member_dir = models_dir / cfg["folder"]
+        csv_path = member_dir / cfg["csv"]
+        best = _find_best_from_csv(
+            csv_path=csv_path,
+            model_col=cfg["model_col"],
+            reward_col=cfg["reward_col"],
+        )
+        if best is None:
+            continue
+
+        model_name, reward = best
+        model_zip = _find_zip_for_model(member_dir, model_name)
+        if model_zip is None:
+            continue
+
+        if reward > best_reward:
+            best_reward = reward
+            best_path = model_zip
+
+    return best_path
+
+
+def _resolve_model_path(model_path_arg: str, models_dir_arg: str) -> Path:
+    candidate = Path(model_path_arg)
+    if model_path_arg.lower() != "auto" and candidate.exists():
+        return candidate
+
+    models_dir = Path(models_dir_arg)
+    if not models_dir.exists():
+        raise FileNotFoundError(
+            f"Models directory not found: {models_dir}. "
+            "Pass --model-path explicitly or provide a valid --models-dir."
+        )
+
+    best = _resolve_best_model_from_models_dir(models_dir)
+    if best is None:
+        if model_path_arg.lower() != "auto":
+            raise FileNotFoundError(
+                f"Model file not found: {model_path_arg}, and auto-detection could not find a valid best model."
+            )
+        raise FileNotFoundError(
+            "Could not auto-detect a best model zip from Models/ logs. Pass --model-path explicitly."
+        )
+    return best
+
+
+def _prepare_numpy_pickle_compat(np: Any) -> None:
+    """
+    Compatibility shim:
+    models saved with NumPy 2 may reference `numpy._core.*` during unpickling.
+    On environments pinned to NumPy 1.x (for older Torch builds), we alias
+    these module paths so model loading can proceed.
+    """
+    try:
+        core_mod = np.core
+        numeric_mod = np.core.numeric
+        if "numpy._core" not in sys.modules:
+            sys.modules["numpy._core"] = core_mod
+        if "numpy._core.numeric" not in sys.modules:
+            sys.modules["numpy._core.numeric"] = numeric_mod
+    except Exception:
+        # Non-fatal: if this fails, normal loading still applies.
+        pass
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Load and play a trained DQN Atari model.")
     parser.add_argument(
         "--model-path",
         type=str,
-        default="dqn_model.zip",
-        help="Path to the trained model zip file (default: dqn_model.zip)",
+        default="Models/Carine/10_Optimized.zip",
+        help="Path to the trained model zip file (default: Models/Carine/10_Optimized.zip). Use 'auto' to pick from CSV logs.",
+    )
+    parser.add_argument(
+        "--models-dir",
+        type=str,
+        default="Models",
+        help="Top-level Models directory used when --model-path auto-detection is enabled.",
     )
     parser.add_argument(
         "--env-id",
@@ -300,33 +416,53 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
 
-    np, gym, DQN, AtariWrapper, make_atari_env, VecEnv, VecFrameStack, VecTransposeImage = _import_dependencies()
+    np, gym, DQN, make_atari_env, VecEnv, VecFrameStack = _import_dependencies()
+    _prepare_numpy_pickle_compat(np)
 
-    if not os.path.exists(args.model_path):
-        raise FileNotFoundError(
-            f"Model file not found: {args.model_path}. "
-            "Place your dummy/trained model in this path or pass --model-path."
-        )
+    resolved_model_path = _resolve_model_path(args.model_path, args.models_dir)
 
     seed = None if args.seed < 0 else args.seed
 
-    print(f"Loading model from: {args.model_path}")
-    model = DQN.load(args.model_path)
-
     env = None
     try:
-        env, env_mode = _select_compatible_env(
-            model=model,
+        env = _build_train_like_vec_atari_env(
             env_id=args.env_id,
             seed=seed,
             n_stack=args.n_stack,
             render_mode=args.render_mode,
-            gym=gym,
-            AtariWrapper=AtariWrapper,
             make_atari_env=make_atari_env,
             VecFrameStack=VecFrameStack,
-            VecTransposeImage=VecTransposeImage,
         )
+        env_mode = "Vec Atari + FrameStack (train.py-compatible)"
+
+        obs_space_for_load = env.observation_space
+        obs_shape = getattr(obs_space_for_load, "shape", None)
+        if isinstance(obs_shape, tuple) and len(obs_shape) == 3 and obs_shape[-1] == args.n_stack:
+            # Saved CNN models are often channels-first internally.
+            obs_space_for_load = gym.spaces.Box(
+                low=0,
+                high=255,
+                shape=(obs_shape[-1], obs_shape[0], obs_shape[1]),
+                dtype=env.observation_space.dtype,
+            )
+
+        print(f"Loading model from: {resolved_model_path}")
+        model = DQN.load(
+            str(resolved_model_path),
+            custom_objects={
+                "observation_space": obs_space_for_load,
+                "action_space": env.action_space,
+                "_last_obs": None,
+                "_last_episode_starts": None,
+                "_last_original_obs": None,
+                "ep_info_buffer": [],
+                "ep_success_buffer": [],
+                "lr_schedule": lambda _: 1e-4,
+                "exploration_schedule": lambda _: 0.02,
+                "train_freq": (4, "step"),
+            },
+        )
+        model.set_env(env)
         print(f"Using environment pipeline: {env_mode}")
 
         capture_frames = args.save_video
