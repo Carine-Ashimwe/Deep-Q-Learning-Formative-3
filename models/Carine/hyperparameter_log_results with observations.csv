@@ -1,0 +1,11 @@
+Model Name,Policy,Learning Rate (lr),Gamma (γ),Batch Size,epsilon_start,epsilon_end,epsilon_decay,steps,env_id,Observed Mean Reward,Observed Std Dev,Observed Avg Episode Length,Noted Behavior
+01_Baseline,CnnPolicy,0.0001,0.99,32,1.0,0.05,0.1,200000,ALE/Breakout-v5,11.8,,,Baseline performance; mid-table reference.
+02_High_LR,CnnPolicy,0.001,0.99,32,1.0,0.05,0.1,200000,ALE/Breakout-v5,18.4,,,Strong score; high LR helped in this run.
+03_Low_LR,CnnPolicy,0.00005,0.99,32,1.0,0.05,0.1,200000,ALE/Breakout-v5,10.8,,,Underperformed; learning likely too slow.
+04_Low_Gamma,CnnPolicy,0.0001,0.8,32,1.0,0.05,0.1,200000,ALE/Breakout-v5,23.0,,,Excellent score; short-horizon strategy worked well.
+05_High_Batch,CnnPolicy,0.0001,0.99,128,1.0,0.05,0.1,200000,ALE/Breakout-v5,18.0,,,High-performing and stable candidate.
+06_Low_Batch,CnnPolicy,0.0001,0.99,8,1.0,0.05,0.1,200000,ALE/Breakout-v5,13.0,,,Decent result; noisy updates still viable.
+07_Fast_Decay,CnnPolicy,0.0001,0.99,32,1.0,0.05,0.02,200000,ALE/Breakout-v5,11.8,,,Early exploration cutoff gave baseline-level result.
+08_High_Min_Eps,CnnPolicy,0.0001,0.99,32,1.0,0.5,0.1,200000,ALE/Breakout-v5,16.0,,,Good score with sustained exploration.
+09_MLP_Comparison,MlpPolicy,0.0001,0.99,32,1.0,0.05,0.1,200000,ALE/Breakout-v5,7.6,,,Lowest score; CNN remains better for image input.
+10_Optimized,CnnPolicy,0.0002,0.99,64,1.0,0.02,0.15,200000,ALE/Breakout-v5,24.4,,,Best overall in this run.
