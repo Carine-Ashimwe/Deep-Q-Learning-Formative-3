@@ -1,0 +1,11 @@
+Model Name,Policy,Learning Rate (lr),Gamma,Batch Size,epsilon_start,epsilon_end,epsilon_decay,steps,env_id,Mean Reward,Std Dev,Avg Episode Length
+A01_Baseline_CNN,CnnPolicy,0.0001,0.99,32,1.0,0.05,0.1,200000,ALE/Breakout-v5,11.4,5.82,2
+A02_High_LR,CnnPolicy,0.0005,0.99,32,1.0,0.05,0.1,200000,ALE/Breakout-v5,16.8,9.14,2
+A03_Very_Low_LR,CnnPolicy,0.00001,0.99,32,1.0,0.05,0.1,200000,ALE/Breakout-v5,6.2,3.45,2
+A04_High_Gamma,CnnPolicy,0.0001,0.995,32,1.0,0.05,0.1,200000,ALE/Breakout-v5,13.0,6.20,3
+A05_Low_Gamma,CnnPolicy,0.0001,0.90,32,1.0,0.05,0.1,200000,ALE/Breakout-v5,17.4,7.90,5
+A06_Large_Batch,CnnPolicy,0.0001,0.99,64,1.0,0.05,0.1,200000,ALE/Breakout-v5,19.6,10.22,3
+A07_Small_Batch,CnnPolicy,0.0001,0.99,16,1.0,0.05,0.1,200000,ALE/Breakout-v5,8.8,4.30,27
+A08_Slow_Epsilon_Decay,CnnPolicy,0.0001,0.99,32,1.0,0.05,0.3,200000,ALE/Breakout-v5,14.2,6.88,3
+A09_MLP_Policy,MlpPolicy,0.0001,0.99,32,1.0,0.05,0.1,200000,ALE/Breakout-v5,5.6,2.34,2
+A10_Optimized,CnnPolicy,0.00025,0.97,64,1.0,0.01,0.2,200000,ALE/Breakout-v5,22.8,11.05,4
